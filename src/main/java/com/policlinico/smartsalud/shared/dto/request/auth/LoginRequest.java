@@ -1,0 +1,16 @@
+// shared/dto/request/auth/LoginRequest.java
+package com.policlinico.smartsalud.shared.dto.request.auth;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "Email debe tener formato válido")
+    private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    private String password;
+}

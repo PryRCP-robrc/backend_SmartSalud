@@ -1,0 +1,22 @@
+// application/service/auth/CustomUserDetailsService.java
+package com.policlinico.smartsalud.application.service.auth;
+
+import com.policlinico.smartsalud.domain.ports.output.PacienteRepositoryPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+    
+    private final PacienteRepositoryPort pacienteRepository;
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return pacienteRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+    }
+}
