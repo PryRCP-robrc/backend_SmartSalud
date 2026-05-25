@@ -9,7 +9,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -35,7 +35,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // Docker Compose Support
-    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+    // developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
@@ -43,6 +43,16 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+
+    // MapStruct
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
+    // JJWT
+    implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
