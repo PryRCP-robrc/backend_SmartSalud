@@ -5,26 +5,34 @@ endpoints REST con Spring Security + JWT y login específico para médicos.
 
 ## 1. Base de datos PostgreSQL
 
-### Opción A — psql nativo
+### Opción A — Docker Compose (RECOMENDADA, todo automático)
 
 ```bash
-# 1. Crear la base
-psql -U postgres -c "CREATE DATABASE policlinico_vidasalud;"
+# 1. Copia el script maestro al directorio de inicialización
+cp "BD Clinica 2.sql" sql/init/01-schema.sql
 
-# 2. Ejecutar el script maestro que les compartieron (BD Clinica 2.sql)
-psql -U postgres -d policlinico_vidasalud -f "BD Clinica 2.sql"
+# 2. Levanta Postgres — ejecuta los scripts solos en orden
+docker compose up -d
 
-# 3. Habilitar el login del médico (agrega password_hash y bcrypt seed)
-psql -U postgres -d policlinico_vidasalud -f sql/add-medico-auth.sql
+# Listo. La BD policlinico_vidasalud queda creada, poblada y con auth de médico.
 ```
 
-### Opción B — Docker
+`compose.yaml` ya define `POSTGRES_DB=policlinico_vidasalud`,
+usuario `postgres` / password `root` y monta `sql/init/` en
+`/docker-entrypoint-initdb.d/` para auto-ejecutar `01-schema.sql` y
+`02-medico-auth.sql` solo la primera vez.
+
+Para resetear desde cero:
+```bash
+docker compose down -v && docker compose up -d
+```
+
+### Opción B — psql nativo
 
 ```bash
-docker run --name postgres-smartsalud -e POSTGRES_PASSWORD=root -p 5432:5432 -d postgres:15
-docker exec -i postgres-smartsalud psql -U postgres -c "CREATE DATABASE policlinico_vidasalud;"
-docker exec -i postgres-smartsalud psql -U postgres -d policlinico_vidasalud < "BD Clinica 2.sql"
-docker exec -i postgres-smartsalud psql -U postgres -d policlinico_vidasalud < sql/add-medico-auth.sql
+psql -U postgres -c "CREATE DATABASE policlinico_vidasalud;"
+psql -U postgres -d policlinico_vidasalud -f "BD Clinica 2.sql"
+psql -U postgres -d policlinico_vidasalud -f sql/add-medico-auth.sql
 ```
 
 ## 2. Backend (Spring Boot)

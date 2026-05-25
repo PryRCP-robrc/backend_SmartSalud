@@ -1,14 +1,30 @@
 services:
 
   postgres:
-    image: postgres:latest
-
+    image: postgres:15
     container_name: postgres_smartsalud
+    restart: unless-stopped
 
     environment:
-      POSTGRES_DB: smartsalud
+      POSTGRES_DB: policlinico_vidasalud
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: contraseña
+      POSTGRES_PASSWORD: root
 
     ports:
       - "5432:5432"
+
+    volumes:
+      # Persistencia entre reinicios
+      - smartsalud_pgdata:/var/lib/postgresql/data
+      # Scripts ejecutados AUTOMÁTICAMENTE la primera vez que arranca la BD.
+      # Orden alfabético: 01-... corre antes que 02-...
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d policlinico_vidasalud"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  smartsalud_pgdata:
