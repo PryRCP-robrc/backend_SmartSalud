@@ -146,6 +146,8 @@ public class MedicoService implements MedicoInputPort {
                 .modalidad(c.getModalidad())
                 .estado(c.getEstado() != null ? c.getEstado().name() : null)
                 .motivoConsulta(c.getMotivoConsulta())
+                .sede(c.getSedeNombre())
+                .sala(c.getSalaNombre())
                 .pacienteId(c.getPacienteId())
                 .pacienteNombres(c.getPacienteNombres())
                 .pacienteApellidos(c.getPacienteApellidos())

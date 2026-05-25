@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.Set;
 import io.jsonwebtoken.security.Keys;
 
 @Slf4j
@@ -30,7 +31,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtTokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
-    
+
+    // Endpoints públicos: NO se valida JWT aquí (Spring Security los permite con permitAll())
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh-token",
+            "/api/auth/logout",
+            "/api/auth/medico/login"
+    );
+
     @Value("${app.jwt.secret}")
     private String jwtSecret;
     
@@ -42,9 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        // Saltar filtro para endpoints de autenticación
+        // Saltar filtro solo para endpoints públicos explícitos
         String path = request.getServletPath();
-        if (path.startsWith("/api/auth/") && !path.equals("/api/auth/me") && !path.equals("/api/auth/change-password")) {
+        if (PUBLIC_PATHS.contains(path)) {
             filterChain.doFilter(request, response);
             return;
         }

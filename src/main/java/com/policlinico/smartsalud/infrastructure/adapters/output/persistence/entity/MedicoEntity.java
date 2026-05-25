@@ -55,4 +55,8 @@ public class MedicoEntity {
 
     @Column(name = "fecha_ingreso")
     private LocalDate fechaIngreso;
+
+    // Columna agregada para login médico (ver script SQL add-medico-auth.sql)
+    @Column(name = "password_hash")
+    private String passwordHash;
 }

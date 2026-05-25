@@ -26,6 +26,7 @@ public class MedicoMapper {
                 .descripcionProfesional(entity.getDescripcionProfesional())
                 .activo(entity.getActivo())
                 .fechaIngreso(entity.getFechaIngreso())
+                .passwordHash(entity.getPasswordHash())
                 .build();
     }
 }

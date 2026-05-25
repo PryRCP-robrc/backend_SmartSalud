@@ -22,4 +22,5 @@ public class Medico {
     private String descripcionProfesional;
     private Boolean activo;
     private LocalDate fechaIngreso;
+    private String passwordHash;
 }
