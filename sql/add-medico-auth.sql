@@ -45,15 +45,15 @@ BEGIN
     SELECT COUNT(DISTINCT entidad_id) INTO medicos_con_rol
       FROM usuario_rol WHERE entidad = 'MEDICO';
 
-    RAISE NOTICE '═══════════════════════════════════════════════';
-    RAISE NOTICE '  Auth médico configurada';
-    RAISE NOTICE '═══════════════════════════════════════════════';
-    RAISE NOTICE 'Médicos totales:           %', total_medicos;
+    RAISE NOTICE '-----------------------------------------------';
+    RAISE NOTICE '  Auth medico configurada';
+    RAISE NOTICE '-----------------------------------------------';
+    RAISE NOTICE 'Medicos totales:           %', total_medicos;
     RAISE NOTICE 'Con password_hash:         %', medicos_con_password;
     RAISE NOTICE 'Con rol MEDICO asignado:   %', medicos_con_rol;
-    RAISE NOTICE '═══════════════════════════════════════════════';
+    RAISE NOTICE '-----------------------------------------------';
     RAISE NOTICE 'Credenciales de prueba:';
     RAISE NOTICE '  Email:    c.mendoza@vidasalud.pe';
     RAISE NOTICE '  Password: Password123';
-    RAISE NOTICE '═══════════════════════════════════════════════';
+    RAISE NOTICE '-----------------------------------------------';
 END $$;
