@@ -39,4 +39,12 @@ public class MedicoRepositoryAdapter implements MedicoRepositoryPort {
     public boolean existsByEmail(String email) {
         return jpaRepository.existsByEmail(email);
     }
+
+    @Override
+    public List<Medico> findAllActivos(Long especialidadId) {
+        var entities = (especialidadId != null)
+                ? jpaRepository.findAllActivosPorEspecialidad(especialidadId)
+                : jpaRepository.findAllActivos();
+        return entities.stream().map(mapper::toDomain).collect(Collectors.toList());
+    }
 }

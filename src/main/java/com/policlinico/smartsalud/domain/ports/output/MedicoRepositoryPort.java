@@ -9,5 +9,6 @@ public interface MedicoRepositoryPort {
     Optional<Medico> findById(Long id);
     Optional<Medico> findByEmail(String email);
     List<Medico> findAll();
+    List<Medico> findAllActivos(Long especialidadId);
     boolean existsByEmail(String email);
 }

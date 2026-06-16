@@ -1,9 +1,9 @@
-// infrastructure/adapters/output/persistence/mapper/CitaMapper.java
 package com.policlinico.smartsalud.infrastructure.adapters.output.persistence.mapper;
 
 import com.policlinico.smartsalud.domain.model.cita.Cita;
 import com.policlinico.smartsalud.domain.model.cita.EstadoCita;
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.entity.CitaEntity;
+import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.entity.MedicoEntity;
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.entity.PacienteEntity;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +14,12 @@ public class CitaMapper {
         if (entity == null) return null;
 
         PacienteEntity p = entity.getPaciente();
+        MedicoEntity m = entity.getMedico();
 
         return Cita.builder()
                 .id(entity.getId())
                 .pacienteId(p != null ? p.getId() : null)
-                .medicoId(entity.getMedico() != null ? entity.getMedico().getId() : null)
+                .medicoId(m != null ? m.getId() : null)
                 .sedeId(entity.getSedeId())
                 .salaId(entity.getSalaId())
                 .fecha(entity.getFecha())
@@ -40,6 +41,9 @@ public class CitaMapper {
                 .pacienteDni(p != null ? p.getDni() : null)
                 .pacienteTelefono(p != null ? p.getTelefono() : null)
                 .pacienteEmail(p != null ? p.getEmail() : null)
+                .medicoNombres(m != null ? m.getNombres() : null)
+                .medicoApellidos(m != null ? m.getApellidos() : null)
+                .medicoEspecialidad(m != null && m.getEspecialidad() != null ? m.getEspecialidad().getNombre() : null)
                 .build();
     }
 }

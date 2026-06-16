@@ -36,6 +36,9 @@ public class Cita {
     private String pacienteDni;
     private String pacienteTelefono;
     private String pacienteEmail;
+    private String medicoNombres;
+    private String medicoApellidos;
+    private String medicoEspecialidad;
     private String sedeNombre;
     private String salaNombre;
 }

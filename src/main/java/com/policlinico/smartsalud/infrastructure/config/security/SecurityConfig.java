@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,7 +40,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Públicos
+                // Públicos — login, registro, browsing de catálogos
                 .requestMatchers(
                         "/api/auth/login",
                         "/api/auth/register",
@@ -47,11 +48,20 @@ public class SecurityConfig {
                         "/api/auth/logout",
                         "/api/auth/medico/login"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/especialidad/**",
+                        "/api/sede/**"
+                ).permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Requieren JWT
+
+                // Roles específicos
                 .requestMatchers("/api/auth/me", "/api/auth/change-password").authenticated()
                 .requestMatchers("/api/auth/medico/me").hasRole("MEDICO")
-                .requestMatchers("/api/medico/**").hasAnyRole("MEDICO", "RECEPCIONISTA", "ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/medico/me").hasRole("MEDICO")
+                .requestMatchers("/api/medico/*/citas", "/api/medico/*/agenda", "/api/medico/*/pacientes")
+                        .hasAnyRole("MEDICO", "RECEPCIONISTA", "ADMIN", "SUPER_ADMIN")
+
+                // Todo lo demás requiere estar autenticado (cita, pago, historial, horario, listado de médicos)
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
