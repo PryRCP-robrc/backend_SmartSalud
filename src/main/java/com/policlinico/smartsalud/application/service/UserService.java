@@ -1,8 +1,9 @@
 package com.policlinico.smartsalud.application.service;
 
-import com.policlinico.smartsalud.application.ports.input.UserUseCase;
-import com.policlinico.smartsalud.domain.model.User;
-import com.policlinico.smartsalud.domain.ports.output.UserRepositoryPort;
+import com.policlinico.smartsalud.application.dto.UserUseCase;
+import com.policlinico.smartsalud.domain.entity.User;
+import com.policlinico.smartsalud.domain.repository.UserRepositoryPort;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -17,10 +18,10 @@ public class UserService implements UserUseCase {
 
     @Override
     public User registerUser(User user) {
-        if(userRepositoryPort.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepositoryPort.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("El correo ya está registrado");
         }
-        user.setActive(true); 
+        user.setActive(true);
         return userRepositoryPort.save(user);
     }
 
