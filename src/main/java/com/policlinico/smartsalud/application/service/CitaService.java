@@ -2,6 +2,7 @@ package com.policlinico.smartsalud.application.service;
 
 import com.policlinico.smartsalud.application.dto.ReservaRequest;
 import com.policlinico.smartsalud.application.dto.HorarioMedicoDTO;
+import com.policlinico.smartsalud.application.dto.CitaDTO;
 import com.policlinico.smartsalud.domain.entity.*;
 import com.policlinico.smartsalud.domain.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +92,84 @@ public class CitaService {
         pagoRepository.save(pago);
 
         return cita.getCodigoReserva();
+    }
+
+    public List<CitaDTO> getAllCitas() {
+        return repository.findAll().stream()
+                .map(c -> new CitaDTO(
+                        c.getId(),
+                        c.getCodigoReserva(),
+                        c.getFecha(),
+                        c.getHora(),
+                        c.getEstado(),
+                        c.getTipoConsulta(),
+                        c.getModalidad(),
+                        c.getPaciente().getNombres() + " " + c.getPaciente().getApellidos(),
+                        c.getMedico().getNombres() + " " + c.getMedico().getApellidos(),
+                        c.getMedico().getEspecialidad().getNombre(),
+                        c.getSede().getNombre()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateCitaEstado(Integer citaId, String nuevoEstado) {
+        Cita cita = repository.findById(citaId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+        
+        cita.setEstado(nuevoEstado);
+        
+        // Si se cancela, liberar el horario
+        if ("CANCELADO".equalsIgnoreCase(nuevoEstado) && cita.getHorario() != null) {
+            HorarioMedico horario = cita.getHorario();
+            horario.setDisponible(true);
+            horarioMedicoRepository.save(horario);
+        }
+        
+        repository.save(cita);
+    }
+
+    @Transactional
+    public void updateCitaDatos(Integer citaId, com.policlinico.smartsalud.application.dto.CitaUpdateRequest request) {
+        Cita cita = repository.findById(citaId)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada"));
+        
+        // Si no hay cambios en fecha, hora y medico, no hacer nada
+        if (cita.getFecha().equals(request.getFecha()) && 
+            cita.getHora().equals(request.getHora()) && 
+            cita.getMedico().getId().equals(request.getMedicoId())) {
+            return;
+        }
+
+        // Buscar el nuevo médico
+        Medico nuevoMedico = medicoRepository.findById(request.getMedicoId())
+                .orElseThrow(() -> new IllegalArgumentException("Médico no encontrado"));
+
+        // Buscar el nuevo horario disponible
+        HorarioMedico nuevoHorario = horarioMedicoRepository.findByMedicoIdAndFecha(request.getMedicoId(), request.getFecha())
+                .stream()
+                .filter(h -> h.getHoraInicio().equals(request.getHora()) && h.getDisponible())
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("El nuevo horario no está disponible"));
+
+        // Liberar el horario anterior si existe
+        if (cita.getHorario() != null) {
+            HorarioMedico horarioAntiguo = cita.getHorario();
+            horarioAntiguo.setDisponible(true);
+            horarioMedicoRepository.save(horarioAntiguo);
+        }
+
+        // Reservar el nuevo horario
+        nuevoHorario.setDisponible(false);
+        horarioMedicoRepository.save(nuevoHorario);
+
+        // Actualizar la cita
+        cita.setMedico(nuevoMedico);
+        cita.setFecha(request.getFecha());
+        cita.setHora(request.getHora());
+        cita.setHorario(nuevoHorario);
+        cita.setSede(nuevoHorario.getSede());
+        
+        repository.save(cita);
     }
 }

@@ -1,5 +1,6 @@
 package com.policlinico.smartsalud.infrastructure.rest;
 
+import com.policlinico.smartsalud.application.dto.CitaDTO;
 import com.policlinico.smartsalud.application.dto.HorarioMedicoDTO;
 import com.policlinico.smartsalud.application.dto.ReservaRequest;
 import com.policlinico.smartsalud.application.service.CitaService;
@@ -30,5 +31,26 @@ public class CitaController {
     public ResponseEntity<String> reservar(@RequestBody ReservaRequest request, Authentication authentication) {
         String codigoReserva = citaService.reservar(authentication.getName(), request);
         return ResponseEntity.ok(codigoReserva);
+    }
+
+    @GetMapping("/admin/todas")
+    public ResponseEntity<List<CitaDTO>> getAllCitas() {
+        return ResponseEntity.ok(citaService.getAllCitas());
+    }
+
+    @PutMapping("/admin/{id}/estado")
+    public ResponseEntity<Void> updateCitaEstado(
+            @PathVariable Integer id, 
+            @RequestParam String estado) {
+        citaService.updateCitaEstado(id, estado);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/admin/{id}/datos")
+    public ResponseEntity<Void> updateCitaDatos(
+            @PathVariable Integer id,
+            @RequestBody com.policlinico.smartsalud.application.dto.CitaUpdateRequest request) {
+        citaService.updateCitaDatos(id, request);
+        return ResponseEntity.ok().build();
     }
 }

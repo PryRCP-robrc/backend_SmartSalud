@@ -49,6 +49,7 @@ public class PacienteService {
                         cita.getEstado(),
                         cita.getTipoConsulta(),
                         cita.getModalidad(),
+                        paciente.getNombres() + " " + paciente.getApellidos(),
                         cita.getMedico().getNombres() + " " + cita.getMedico().getApellidos(),
                         cita.getMedico().getEspecialidad().getNombre(),
                         cita.getSede().getNombre()

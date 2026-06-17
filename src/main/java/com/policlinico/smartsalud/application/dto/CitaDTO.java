@@ -11,6 +11,7 @@ public record CitaDTO(
     String estado,
     String tipoConsulta,
     String modalidad,
+    String pacienteNombre,
     String medicoNombre,
     String especialidadNombre,
     String sedeNombre

@@ -42,7 +42,9 @@ public class MedicoService {
     }
 
     public List<Medico> getAllMedicos() {
-        return repository.findAll();
+        return repository.findAll().stream()
+            .filter(Medico::getActivo)
+            .collect(Collectors.toList());
     }
 
     public List<HorarioMedicoDTO> getAgenda(String email) {
@@ -72,6 +74,7 @@ public class MedicoService {
                         cita.getTipoConsulta(),
                         cita.getModalidad(),
                         cita.getPaciente().getNombres() + " " + cita.getPaciente().getApellidos(),
+                        medico.getNombres() + " " + medico.getApellidos(),
                         medico.getEspecialidad().getNombre(),
                         cita.getSede().getNombre()
                 ))
