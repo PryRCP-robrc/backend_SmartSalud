@@ -1,30 +1,84 @@
+# ===================================================================
+#  SmartSalud — Stack completo en Docker
+#  Levanta:  PostgreSQL + Backend (Spring Boot) + Frontend (Next.js)
+#
+#  REQUISITOS (una sola vez):
+#   1. Clonar AMBOS repos como carpetas hermanas:
+#        backend_SmartSalud/   (este)
+#        Proy.Integrador_Front/
+#   2. Copiar el script maestro a:
+#        backend_SmartSalud/sql/init/01-schema.sql
+#        (es el archivo "BD Clinica 2.sql" que te compartieron)
+#
+#  ARRANCAR TODO:
+#        docker compose up -d --build
+#
+#  URLs:
+#        Frontend  -> http://localhost:3000
+#        Backend   -> http://localhost:8080
+#        Postgres  -> localhost:5432  (user: postgres / pass: postgres)
+#
+#  Login de prueba (password: Password123):
+#        Medico   -> http://localhost:3000/medico/login  (c.mendoza@vidasalud.pe)
+#        Paciente -> http://localhost:3000/login          (juan.perez@email.com)
+# ===================================================================
+
 services:
 
+  # -------------------- Base de datos --------------------
   postgres:
     image: postgres:15
-    container_name: postgres_smartsalud
+    container_name: smartsalud_postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: policlinico_vidasalud
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
-
     volumes:
-      # Persistencia entre reinicios
       - smartsalud_pgdata:/var/lib/postgresql/data
-      # Scripts ejecutados AUTOMÁTICAMENTE la primera vez que arranca la BD.
-      # Orden alfabético: 01-... corre antes que 02-...
+      # Scripts ejecutados automaticamente la primera vez (orden alfabetico)
       - ./sql/init:/docker-entrypoint-initdb.d:ro
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d policlinico_vidasalud"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 15
+
+  # -------------------- Backend Spring Boot --------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartsalud_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/policlinico_vidasalud
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      CORS_ORIGINS: http://localhost:3000
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8080:8080"
+
+  # -------------------- Frontend Next.js --------------------
+  frontend:
+    build:
+      context: ../Proy.Integrador_Front
+      dockerfile: Dockerfile
+      args:
+        # El navegador (host) llama al backend por el puerto publicado
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    container_name: smartsalud_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
 
 volumes:
   smartsalud_pgdata:

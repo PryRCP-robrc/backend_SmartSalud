@@ -1,26 +1,26 @@
 -- =====================================================================
---  add-medico-auth.sql
---  Habilita el login del médico añadiendo la columna password_hash
---  y poblando los médicos de prueba con una contraseña conocida.
+--  02-medico-auth.sql
+--  Habilita el login del medico y normaliza el password de prueba.
+--  Se ejecuta automaticamente despues de 01-schema.sql en Docker.
 --
---  Requiere haber ejecutado primero: BD Clinica 2.sql
---
---  Ejecutar:
---    psql -U postgres -d policlinico_vidasalud -f add-medico-auth.sql
+--  Usa pgcrypto (crypt + gen_salt) que ya esta habilitado por el script
+--  maestro, de modo que el hash BCrypt SIEMPRE corresponde a "Password123".
 -- =====================================================================
 
--- 1) Agregar columna password_hash a la tabla medico (idempotente)
+-- 1) Columna password_hash en medico (idempotente)
 ALTER TABLE medico
     ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
 
--- 2) Poblar password_hash en los médicos seed con BCrypt de "Password123"
---    (mismo hash que ya usan los pacientes seed)
+-- 2) Password BCrypt real para "Password123" en TODOS los medicos
 UPDATE medico
-SET    password_hash = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
-WHERE  password_hash IS NULL;
+SET    password_hash = crypt('Password123', gen_salt('bf', 10));
 
--- 3) Asegurar que los médicos 4 al 8 también tengan rol MEDICO asignado
---    (el script base solo asigna a los IDs 1, 2 y 3)
+-- 3) Password BCrypt real para "Password123" en TODOS los pacientes seed
+--    (asi el login de paciente demo tambien funciona out-of-the-box)
+UPDATE paciente
+SET    password_hash = crypt('Password123', gen_salt('bf', 10));
+
+-- 4) Asignar rol MEDICO a todos los medicos que aun no lo tengan
 INSERT INTO usuario_rol (entidad, entidad_id, rol_id)
 SELECT 'MEDICO', m.id, r.id
 FROM   medico m
@@ -33,27 +33,25 @@ WHERE  r.nombre = 'MEDICO'
            AND  ur.rol_id    = r.id
        );
 
--- 4) Verificación
+-- 5) Verificacion
 DO $$
 DECLARE
     total_medicos          INTEGER;
     medicos_con_password   INTEGER;
-    medicos_con_rol        INTEGER;
+    total_pacientes        INTEGER;
 BEGIN
     SELECT COUNT(*) INTO total_medicos        FROM medico;
     SELECT COUNT(*) INTO medicos_con_password FROM medico WHERE password_hash IS NOT NULL;
-    SELECT COUNT(DISTINCT entidad_id) INTO medicos_con_rol
-      FROM usuario_rol WHERE entidad = 'MEDICO';
+    SELECT COUNT(*) INTO total_pacientes      FROM paciente;
 
     RAISE NOTICE '-----------------------------------------------';
-    RAISE NOTICE '  Auth medico configurada';
+    RAISE NOTICE '  Auth configurada (medicos y pacientes)';
     RAISE NOTICE '-----------------------------------------------';
-    RAISE NOTICE 'Medicos totales:           %', total_medicos;
-    RAISE NOTICE 'Con password_hash:         %', medicos_con_password;
-    RAISE NOTICE 'Con rol MEDICO asignado:   %', medicos_con_rol;
+    RAISE NOTICE 'Medicos:           %  (con password: %)', total_medicos, medicos_con_password;
+    RAISE NOTICE 'Pacientes:         %', total_pacientes;
     RAISE NOTICE '-----------------------------------------------';
-    RAISE NOTICE 'Credenciales de prueba:';
-    RAISE NOTICE '  Email:    c.mendoza@vidasalud.pe';
-    RAISE NOTICE '  Password: Password123';
+    RAISE NOTICE 'Credenciales de prueba (password: Password123):';
+    RAISE NOTICE '  Medico:   c.mendoza@vidasalud.pe';
+    RAISE NOTICE '  Paciente: juan.perez@email.com';
     RAISE NOTICE '-----------------------------------------------';
 END $$;
