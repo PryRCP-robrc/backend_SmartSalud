@@ -1,6 +1,7 @@
 package com.policlinico.smartsalud.application.service.pago;
 
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.entity.PagoEntity;
+import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.repository.JpaCitaRepository;
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.repository.JpaPagoRepository;
 import com.policlinico.smartsalud.shared.dto.request.pago.CrearPagoRequest;
 import com.policlinico.smartsalud.shared.dto.response.pago.PagoResponse;
@@ -20,13 +21,14 @@ import java.util.UUID;
 public class PagoService {
 
     private final JpaPagoRepository pagoRepo;
+    private final JpaCitaRepository citaRepo;
 
     @Transactional
     public PagoResponse procesarPago(CrearPagoRequest request) {
         log.info("Procesando pago cita={} metodo={}", request.getCitaId(), request.getMetodo());
 
         // Simulación: tarjeta y billeteras electrónicas se aprueban inmediatamente,
-        // transferencia bancaria queda PENDIENTE hasta verificación manual.
+        // transferencia/efectivo/seguro quedan PENDIENTE hasta verificación manual.
         boolean confirmadoInmediato = !request.getMetodo().equals("TRANSFERENCIA")
                 && !request.getMetodo().equals("EFECTIVO")
                 && !request.getMetodo().equals("SEGURO_MEDICO");
@@ -46,6 +48,19 @@ public class PagoService {
                 .build();
 
         PagoEntity saved = pagoRepo.save(pago);
+
+        // Si el pago se completó, CONFIRMAR la cita (pasa de RESERVADO a CONFIRMADO).
+        // Así el frontend distingue: RESERVADO = pago pendiente, CONFIRMADO = pagada.
+        if (confirmadoInmediato) {
+            citaRepo.findById(request.getCitaId()).ifPresent(cita -> {
+                if ("RESERVADO".equals(cita.getEstado())) {
+                    cita.setEstado("CONFIRMADO");
+                    citaRepo.save(cita);
+                    log.info("Cita {} confirmada tras pago completado", cita.getId());
+                }
+            });
+        }
+
         return toResponse(saved);
     }
 
