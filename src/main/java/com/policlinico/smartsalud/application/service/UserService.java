@@ -2,52 +2,61 @@ package com.policlinico.smartsalud.application.service;
 
 import com.policlinico.smartsalud.application.dto.UserUseCase;
 import com.policlinico.smartsalud.domain.entity.User;
-import com.policlinico.smartsalud.domain.repository.UserRepositoryPort;
-
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class UserService implements UserUseCase {
 
-    private final UserRepositoryPort userRepositoryPort;
-
-    public UserService(UserRepositoryPort userRepositoryPort) {
-        this.userRepositoryPort = userRepositoryPort;
-    }
+    private final Map<Long, User> storage = new ConcurrentHashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong(1);
 
     @Override
     public User registerUser(User user) {
-        if (userRepositoryPort.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado");
-        }
-        user.setActive(true);
-        return userRepositoryPort.save(user);
+        Long id = idGenerator.getAndIncrement();
+        user.setId(id);
+        storage.put(id, user);
+        return user;
     }
 
     @Override
     public User getUserById(Long id) {
-        return userRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        User user = storage.get(id);
+        if (user == null) {
+            throw new IllegalArgumentException("Usuario no encontrado con id: " + id);
+        }
+        return user;
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userRepositoryPort.findAll();
+        return new ArrayList<>(storage.values());
     }
 
     @Override
-    public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id);
-        existingUser.setUsername(user.getUsername());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setRole(user.getRole());
-        return userRepositoryPort.save(existingUser);
+    public User updateUser(Long id, User updated) {
+        User existing = getUserById(id);
+        existing.setUsername(updated.getUsername());
+        existing.setEmail(updated.getEmail());
+        existing.setRole(updated.getRole());
+        existing.setActive(updated.isActive());
+        if (updated.getPassword() != null && !updated.getPassword().isBlank()) {
+            existing.setPassword(updated.getPassword());
+        }
+        storage.put(id, existing);
+        return existing;
     }
 
     @Override
     public void deleteUser(Long id) {
-        User existingUser = getUserById(id);
-        userRepositoryPort.deleteById(existingUser.getId());
+        if (!storage.containsKey(id)) {
+            throw new IllegalArgumentException("Usuario no encontrado con id: " + id);
+        }
+        storage.remove(id);
     }
 }

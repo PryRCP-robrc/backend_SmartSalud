@@ -1,9 +1,9 @@
 package com.policlinico.smartsalud.infrastructure.rest;
 
-import com.policlinico.smartsalud.application.ports.input.UserUseCase;
+import com.policlinico.smartsalud.application.dto.UserUseCase;
+import com.policlinico.smartsalud.application.dto.UsuarioDTO;
+import com.policlinico.smartsalud.application.dto.UsuarioRequest;
 import com.policlinico.smartsalud.domain.entity.User;
-import com.policlinico.smartsalud.shared.dto.request.UserRequest;
-import com.policlinico.smartsalud.shared.dto.response.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,39 +23,28 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
-        User userModel = new User(null, request.getUsername(), request.getEmail(), request.getPassword(),
-                request.getRole(), true);
-        User savedUser = userUseCase.registerUser(userModel);
-        UserResponse response = new UserResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(),
-                savedUser.getRole(), savedUser.isActive());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<User> createUser(@RequestBody User request) {
+        User saved = userUseCase.registerUser(
+                new User(null, request.getUsername(), request.getEmail(),
+                        request.getPassword(), request.getRole(), true));
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        User user = userUseCase.getUserById(id);
-        UserResponse response = new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getRole(),
-                user.isActive());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userUseCase.getUserById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> response = userUseCase.getAllUsers().stream()
-                .map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getRole(),
-                        user.isActive()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userUseCase.getAllUsers());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
-        User userModel = new User(null, request.getUsername(), request.getEmail(), null, request.getRole(), true);
-        User updatedUser = userUseCase.updateUser(id, userModel);
-        UserResponse response = new UserResponse(updatedUser.getId(), updatedUser.getUsername(), updatedUser.getEmail(),
-                updatedUser.getRole(), updatedUser.isActive());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User request) {
+        return ResponseEntity.ok(userUseCase.updateUser(id,
+                new User(null, request.getUsername(), request.getEmail(),
+                        request.getPassword(), request.getRole(), request.isActive())));
     }
 
     @DeleteMapping("/{id}")

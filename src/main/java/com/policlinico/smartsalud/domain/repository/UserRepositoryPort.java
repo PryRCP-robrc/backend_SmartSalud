@@ -1,19 +1,15 @@
 package com.policlinico.smartsalud.domain.repository;
 
+import com.policlinico.smartsalud.domain.entity.Paciente;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
-import com.policlinico.smartsalud.domain.entity.User;
+@Repository
+public interface UserRepositoryPort extends JpaRepository<Paciente, Integer> {
 
-import java.util.List;
+    Optional<Paciente> findByEmail(String email);
 
-public interface UserRepositoryPort {
-    User save(User user);
-
-    Optional<User> findById(Long id);
-
-    Optional<User> findByEmail(String email);
-
-    List<User> findAll();
-
-    void deleteById(Long id);
+    boolean existsByEmail(String email);
 }
