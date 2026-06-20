@@ -25,20 +25,4 @@ public class EspecialidadController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
-
-    @org.springframework.web.bind.annotation.PostMapping
-    public ResponseEntity<EspecialidadDTO> createEspecialidad(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.policlinico.smartsalud.application.dto.EspecialidadRequest request) {
-        return ResponseEntity.ok(service.createEspecialidad(request));
-    }
-
-    @org.springframework.web.bind.annotation.PutMapping("/{id}")
-    public ResponseEntity<EspecialidadDTO> updateEspecialidad(@org.springframework.web.bind.annotation.PathVariable Integer id, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.policlinico.smartsalud.application.dto.EspecialidadRequest request) {
-        return ResponseEntity.ok(service.updateEspecialidad(id, request));
-    }
-
-    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEspecialidad(@org.springframework.web.bind.annotation.PathVariable Integer id) {
-        service.deleteEspecialidad(id);
-        return ResponseEntity.noContent().build();
-    }
 }

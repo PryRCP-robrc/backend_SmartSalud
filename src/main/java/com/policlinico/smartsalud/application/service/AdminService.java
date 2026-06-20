@@ -53,7 +53,6 @@ public class AdminService {
 
     public List<UsuarioDTO> getUsuariosAdministrativos() {
         return pacienteRepository.findAll().stream()
-            .filter(Paciente::getActivo)
             .map(p -> {
                 List<UsuarioRol> roles = usuarioRolRepository.findByEntidadAndEntidadId("PACIENTE", p.getId());
                 String rolNombre = roles.isEmpty() ? "PACIENTE" : roles.get(0).getRol().getNombre();

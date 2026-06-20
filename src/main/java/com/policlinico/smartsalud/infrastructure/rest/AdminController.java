@@ -42,7 +42,8 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}")
-    public ResponseEntity<UsuarioDTO> updateUsuario(@PathVariable Integer id, @Valid @RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioDTO> updateUsuario(@PathVariable Integer id,
+            @Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(adminService.updateUsuario(id, request));
     }
 }

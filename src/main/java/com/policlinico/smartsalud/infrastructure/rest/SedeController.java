@@ -25,20 +25,4 @@ public class SedeController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
-
-    @org.springframework.web.bind.annotation.PostMapping
-    public ResponseEntity<SedeDTO> createSede(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.policlinico.smartsalud.application.dto.SedeRequest request) {
-        return ResponseEntity.ok(service.createSede(request));
-    }
-
-    @org.springframework.web.bind.annotation.PutMapping("/{id}")
-    public ResponseEntity<SedeDTO> updateSede(@org.springframework.web.bind.annotation.PathVariable Integer id, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.policlinico.smartsalud.application.dto.SedeRequest request) {
-        return ResponseEntity.ok(service.updateSede(id, request));
-    }
-
-    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSede(@org.springframework.web.bind.annotation.PathVariable Integer id) {
-        service.deleteSede(id);
-        return ResponseEntity.noContent().build();
-    }
 }
