@@ -7,7 +7,9 @@ import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.map
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.repository.JpaMedicoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,17 @@ public class MedicoRepositoryAdapter implements MedicoRepositoryPort {
         var entities = (especialidadId != null)
                 ? jpaRepository.findAllActivosPorEspecialidad(especialidadId)
                 : jpaRepository.findAllActivos();
-        return entities.stream().map(mapper::toDomain).collect(Collectors.toList());
+
+        // tarifa por medico (medico_id -> monto) para exponer el precio real de la consulta
+        Map<Long, BigDecimal> tarifas = jpaRepository.findTarifasPorMedico().stream()
+                .collect(Collectors.toMap(
+                        r -> ((Number) r[0]).longValue(),
+                        r -> (BigDecimal) r[1],
+                        (a, b) -> a));
+
+        return entities.stream()
+                .map(mapper::toDomain)
+                .peek(m -> m.setTarifaConsulta(tarifas.get(m.getId())))
+                .collect(Collectors.toList());
     }
 }

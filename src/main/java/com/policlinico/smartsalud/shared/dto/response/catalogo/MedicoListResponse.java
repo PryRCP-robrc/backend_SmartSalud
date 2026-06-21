@@ -3,6 +3,8 @@ package com.policlinico.smartsalud.shared.dto.response.catalogo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 public class MedicoListResponse {
@@ -17,4 +19,5 @@ public class MedicoListResponse {
     private String fotoUrl;
     private Integer aniosExperiencia;
     private String descripcionProfesional;
+    private BigDecimal tarifaConsulta;
 }

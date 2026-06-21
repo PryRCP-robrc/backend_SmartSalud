@@ -3,6 +3,7 @@ package com.policlinico.smartsalud.domain.model.medico;
 
 import lombok.Builder;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -23,4 +24,5 @@ public class Medico {
     private Boolean activo;
     private LocalDate fechaIngreso;
     private String passwordHash;
+    private BigDecimal tarifaConsulta;
 }

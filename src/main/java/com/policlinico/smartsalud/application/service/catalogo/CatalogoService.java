@@ -62,6 +62,7 @@ public class CatalogoService implements CatalogoInputPort {
                         .fotoUrl(m.getFotoUrl())
                         .aniosExperiencia(m.getAniosExperiencia())
                         .descripcionProfesional(m.getDescripcionProfesional())
+                        .tarifaConsulta(m.getTarifaConsulta())
                         .build())
                 .collect(Collectors.toList());
     }

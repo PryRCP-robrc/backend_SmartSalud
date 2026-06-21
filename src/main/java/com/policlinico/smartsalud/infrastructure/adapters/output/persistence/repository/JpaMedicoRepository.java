@@ -18,4 +18,8 @@ public interface JpaMedicoRepository extends JpaRepository<MedicoEntity, Long> {
 
     @Query("SELECT m FROM MedicoEntity m JOIN FETCH m.especialidad WHERE m.activo = true AND m.especialidad.id = :especialidadId ORDER BY m.apellidos ASC")
     List<MedicoEntity> findAllActivosPorEspecialidad(@Param("especialidadId") Long especialidadId);
+
+    // Tarifa de consulta por medico: una fila por medico (la de menor sede_id) desde la tabla tarifa_consulta.
+    @Query(value = "SELECT DISTINCT ON (medico_id) medico_id, monto FROM tarifa_consulta ORDER BY medico_id, sede_id ASC", nativeQuery = true)
+    List<Object[]> findTarifasPorMedico();
 }
