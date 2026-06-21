@@ -1,6 +1,7 @@
 package com.policlinico.smartsalud.application.service.historial;
 
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.entity.HistorialClinicoEntity;
+import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.repository.JpaCitaRepository;
 import com.policlinico.smartsalud.infrastructure.adapters.output.persistence.repository.JpaHistorialClinicoRepository;
 import com.policlinico.smartsalud.shared.dto.request.historial.CrearHistorialRequest;
 import com.policlinico.smartsalud.shared.dto.response.historial.HistorialClinicoResponse;
@@ -19,6 +20,7 @@ import java.util.List;
 public class HistorialClinicoService {
 
     private final JpaHistorialClinicoRepository repo;
+    private final JpaCitaRepository citaRepo;
 
     @Transactional
     public HistorialClinicoResponse crear(CrearHistorialRequest request) {
@@ -37,7 +39,18 @@ public class HistorialClinicoService {
                 .creadoEn(LocalDateTime.now())
                 .build();
 
-        return toResponse(repo.save(entity));
+        HistorialClinicoResponse response = toResponse(repo.save(entity));
+
+        // Al registrar el historial de una cita, esa cita queda ATENDIDA.
+        if (request.getCitaId() != null) {
+            citaRepo.findById(request.getCitaId()).ifPresent(cita -> {
+                cita.setEstado("ATENDIDO");
+                citaRepo.save(cita);
+                log.info("Cita {} marcada como ATENDIDO tras registrar historial", cita.getId());
+            });
+        }
+
+        return response;
     }
 
     public List<HistorialClinicoResponse> listarPorPaciente(Long pacienteId) {
