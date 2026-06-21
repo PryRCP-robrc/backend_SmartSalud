@@ -12,5 +12,5 @@ public interface ComprobanteRepository extends JpaRepository<Comprobante, Intege
 
     List<Comprobante> findByPagoId(Integer pagoId);
 
-    Optional<Comprobante> findByNumeroComprobante(String numeroComprobante);
+    Optional<Comprobante> findByNumero(String numero);
 }

@@ -11,5 +11,5 @@ public interface SalaRepository extends JpaRepository<Sala, Integer> {
 
     List<Sala> findBySedeId(Integer sedeId);
 
-    List<Sala> findBySedeIdAndActivoTrue(Integer sedeId);
+    List<Sala> findBySedeIdAndActivaTrue(Integer sedeId);
 }

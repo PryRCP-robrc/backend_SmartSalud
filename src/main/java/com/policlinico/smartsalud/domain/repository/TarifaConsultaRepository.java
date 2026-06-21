@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface TarifaConsultaRepository extends JpaRepository<TarifaConsulta, Integer> {
 
-    List<TarifaConsulta> findByEspecialidadId(Integer especialidadId);
+    List<TarifaConsulta> findByMedicoEspecialidadId(Integer especialidadId);
 
-    Optional<TarifaConsulta> findByEspecialidadIdAndActivoTrue(Integer especialidadId);
+    Optional<TarifaConsulta> findByMedicoEspecialidadIdAndActivaTrue(Integer especialidadId);
 }

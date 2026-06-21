@@ -11,5 +11,5 @@ public interface PlantillaHorarioRepository extends JpaRepository<PlantillaHorar
 
     List<PlantillaHorario> findByMedicoId(Integer medicoId);
 
-    List<PlantillaHorario> findByMedicoIdAndActivoTrue(Integer medicoId);
+    List<PlantillaHorario> findByMedicoIdAndActivaTrue(Integer medicoId);
 }
